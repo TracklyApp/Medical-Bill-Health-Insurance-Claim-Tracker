@@ -1,0 +1,25 @@
+{
+  "id": "./",
+  "name": "TracklyApp — Medical & Insurance",
+  "short_name": "TracklyApp",
+  "description": "Private medical bills and insurance claims, in one place.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f5f0",
+  "theme_color": "#193d31",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -77,7 +77,7 @@ function timeline(s,billId){
  const b=s.bills.find(b=>b.id===billId);if(!b)return [];
  const events=[{id:'service:'+b.id,billId:b.id,date:b.serviceDate,title:'Medical service',notes:b.category+' · '+b.provider,source:'record',documentId:''}];
  if(b.eobDate)events.push({id:'eob:'+b.id,billId:b.id,date:b.eobDate,title:'EOB recorded',notes:b.eobNumber||'Explanation of Benefits',source:'record',documentId:b.attachment?'attachment:'+b.id:''});
- for(const t of s.transactions.filter(t=>t.billId===billId))events.push({id:'payment:'+t.id,billId,date:t.date,title:t.type+' · '+T.money(t.amount),notes:t.notes||t.reference,source:'transaction',documentId:''});
+ for(const t of s.transactions.filter(t=>t.billId===billId))events.push({id:'payment:'+t.id,billId,date:t.date,title:t.type+' · '+T.money(t.amount,T.currency(s)),notes:t.notes||t.reference,source:'transaction',documentId:''});
  for(const a of s.appeals.filter(a=>a.billId===billId))events.push({id:'appeal:'+a.id,billId,date:a.date,title:a.action,notes:a.notes,source:'appeal',documentId:''});
  for(const e of s.activity||[])if(e.billId===billId)events.push({...e,source:'activity'});
  return events.sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));

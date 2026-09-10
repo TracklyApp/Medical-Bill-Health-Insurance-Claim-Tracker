@@ -4,8 +4,12 @@ const statuses=['Pending','Approved','Partially Paid','Denied'];
 const today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');};
 const uid=()=>globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+Math.random().toString(36).slice(2);
 const dollars=value=>Math.round((Number(value)||0)*100);
-const money=cents=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(cents/100);
-const empty=()=>({version:1,settings:{theme:'light',textSize:'medium'},bills:[],transactions:[],appeals:[],plans:[],contacts:[],policies:[]});
+const currencies=[["USD","US Dollar"],["EUR","Euro"],["GBP","British Pound"],["RON","Romanian Leu"],["CAD","Canadian Dollar"],["AUD","Australian Dollar"],["NZD","New Zealand Dollar"],["CHF","Swiss Franc"],["SEK","Swedish Krona"],["NOK","Norwegian Krone"],["DKK","Danish Krone"],["PLN","Polish Zloty"],["CZK","Czech Koruna"],["SGD","Singapore Dollar"],["HKD","Hong Kong Dollar"],["INR","Indian Rupee"],["ZAR","South African Rand"],["BRL","Brazilian Real"],["MXN","Mexican Peso"],["AED","UAE Dirham"]];
+const supportedCurrencies=typeof Intl.supportedValuesOf==="function"?new Set(Intl.supportedValuesOf("currency")):new Set(currencies.map(([code])=>code));
+const validCurrency=code=>typeof code==="string"&&/^[A-Z]{3}$/.test(code)&&supportedCurrencies.has(code);
+const currency=s=>s?.settings?.currency||"USD";
+const money=(cents,code="USD",display="symbol")=>{if(!validCurrency(code))throw new Error("Enter a supported three-letter currency code, such as USD, EUR, GBP or RON.");return new Intl.NumberFormat("en-US",{style:"currency",currency:code,currencyDisplay:display,minimumFractionDigits:2,maximumFractionDigits:2}).format(cents/100);};
+const empty=()=>({version:1,settings:{theme:'light',textSize:'medium',currency:'USD'},bills:[],transactions:[],appeals:[],plans:[],contacts:[],policies:[]});
 const sum=(items,fn)=>items.reduce((total,item)=>total+fn(item),0);
 function paid(state,id){return sum(state.transactions.filter(t=>t.billId===id),t=>t.type==='Payment'?t.amount:t.type==='Provider refund'?-t.amount:0);}
 function balance(state,bill){return bill.patientOwes===null?null:Math.max(0,bill.patientOwes-paid(state,bill.id));}
@@ -19,6 +23,7 @@ function validDate(s){if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s))ret
 function validate(s){
 const fail=msg=>{throw new Error(msg);};
 if(!s||s.version!==1||!s.settings||!['light','dark'].includes(s.settings.theme))fail('Unsupported or invalid backup.');
+if(s.settings.currency!==undefined&&!validCurrency(s.settings.currency))fail('Unsupported workspace currency.');
 if(s.settings.textSize!==undefined&&!['small','medium','large'].includes(s.settings.textSize))fail('Invalid text size preference.');
 if(s.settings.profileName!==undefined&&(typeof s.settings.profileName!=='string'||!s.settings.profileName.trim()||s.settings.profileName.length>60))fail('Enter a display name between 1 and 60 characters.');
 if(s.settings.profileInitials!==undefined&&(typeof s.settings.profileInitials!=='string'||!/^[\p{L}\p{N}]{0,2}$/u.test(s.settings.profileInitials)))fail('Use up to two letters or numbers for your initials.');
@@ -95,5 +100,5 @@ function upgradeSamples(current){
   return validate(next);
 }
 
-root.Trackly={statuses,today,uid,dollars,money,empty,sum,paid,balance,credit,review,totals,planInfo,deadlines,validDate,validate,demo,showcase,upgradeSamples,addPeriod};
+root.Trackly={statuses,today,uid,dollars,money,currencies,currency,validCurrency,empty,sum,paid,balance,credit,review,totals,planInfo,deadlines,validDate,validate,demo,showcase,upgradeSamples,addPeriod};
 })(globalThis);

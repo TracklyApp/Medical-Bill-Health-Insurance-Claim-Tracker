@@ -9,7 +9,7 @@ async function generate(state,options={},fontBytes){
  const font=await doc.embedFont(bytes,{subset:true}),bold=await doc.embedFont(StandardFonts.HelveticaBold);
  const W=595.28,H=841.89,M=42,CW=W-M*2,BOTTOM=56,ink=rgb(.08,.08,.08),muted=rgb(.28,.28,.28),rule=rgb(.7,.7,.7),pale=rgb(.95,.95,.95);
  const pages=[];let page,y,sectionName='Report overview';
- const full=options.mode==='full',money=value=>value===null||value===undefined?'Not confirmed':T.money(value);
+ const full=options.mode==='full',money=value=>value===null||value===undefined?'Not confirmed':T.money(value,T.currency(state));
  const clean=value=>String(value??'').replace(/[\u0000-\u0008\u000b-\u001f]/g,'').replace(/[\u2011\u2013\u2014]/g,'-');
  function wrap(value,size=11,width=CW,type=font){
   const out=[];for(const block of clean(value).split('\n')){
@@ -76,7 +76,7 @@ async function generate(state,options={},fontBytes){
  newPage();
  paragraph(full?'Full medical expense report':'Medical expense report',22,ink,10);
  const member=state.members?.find(m=>m.id===options.memberId);
- paragraph('Family: '+(member?.name||'All family members'),11);
+ paragraph('Family: '+(member?.name||'All family members')+' | Currency: '+T.currency(state),11);
  paragraph('Service period: '+(!options.from&&!options.to?'All time':(options.from||'Any start date')+' to '+(options.to||'Any end date')),11);
  if(state.demo)paragraph('SAMPLE DATA - Fictional example records',10,muted);
  paragraph('Both period endpoints are included. Linked payments and claim history are shown in full. Balances reflect current recorded information.',10,muted,9);
@@ -183,10 +183,10 @@ async function generate(state,options={},fontBytes){
  });
  doc.setTitle(full?'TracklyApp - Full medical expense report':'TracklyApp - Medical expense report');doc.setCreator('TracklyApp');return doc.save();
 }
-async function exampleEOB(bill){
+async function exampleEOB(bill,currency="USD"){
  const {PDFDocument,StandardFonts,rgb}=root.PDFLib,doc=await PDFDocument.create(),page=doc.addPage([595,842]),font=await doc.embedFont(StandardFonts.Helvetica);
  let y=780;const line=(text,size=13)=>{page.drawText(text,{x:44,y,size,font,color:rgb(.13,.3,.24)});y-=35;};
- line('SAMPLE - NOT A REAL INSURANCE DOCUMENT',13);line('Explanation of Benefits',24);line(bill.provider);line('Patient: '+bill.patient);line('Service date: '+bill.serviceDate);line('Claim: '+bill.claimNumber);line('Billed: '+root.Trackly.money(bill.billed));line('Allowed: '+(bill.allowed===null?'Not confirmed':root.Trackly.money(bill.allowed)));line('Insurance paid: '+root.Trackly.money(bill.insurancePaid));line('Patient responsibility: '+(bill.patientOwes===null?'Awaiting review':root.Trackly.money(bill.patientOwes)));line('This sample EOB is not a bill.',11);return doc.saveAsBase64({dataUri:true});
+ line('SAMPLE - NOT A REAL INSURANCE DOCUMENT',13);line('Explanation of Benefits',24);line(bill.provider);line('Patient: '+bill.patient);line('Service date: '+bill.serviceDate);line('Claim: '+bill.claimNumber);line('Billed: '+root.Trackly.money(bill.billed,currency,"code"));line('Allowed: '+(bill.allowed===null?'Not confirmed':root.Trackly.money(bill.allowed,currency,"code")));line('Insurance paid: '+root.Trackly.money(bill.insurancePaid,currency,"code"));line('Patient responsibility: '+(bill.patientOwes===null?'Awaiting review':root.Trackly.money(bill.patientOwes,currency,"code")));line('This sample EOB is not a bill.',11);return doc.saveAsBase64({dataUri:true});
 }
 root.FeaturePDF={generate,exampleEOB};
 })(globalThis);

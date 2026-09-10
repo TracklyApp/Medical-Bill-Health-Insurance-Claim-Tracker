@@ -1,4 +1,4 @@
-const CACHE='trackly-shell-v16';
+const CACHE='trackly-shell-v17';
 const ASSETS=['./','./index.html','./styles.css','./core.js','./sample-photos.js','./app.js','./secure-store.js','./feature-data.js','./feature-pdf.js','./features.js','./User%20Manual.html','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./vendor/pdf-lib.min.js','./vendor/fontkit.umd.min.js','./vendor/NotoSans-Regular.ttf','./vendor/tesseract.min.js','./vendor/worker.min.js','./vendor/tesseract-core.wasm.js','./vendor/tesseract-core-simd.wasm.js','./vendor/tesseract-core-lstm.wasm.js','./vendor/tesseract-core-simd-lstm.wasm.js','./vendor/eng.traineddata.gz'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('trackly-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
